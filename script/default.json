@@ -1,0 +1,9 @@
+{
+    "trigger":"Key.f7",
+    "script":{
+        "type":["mouse"],
+        "key":["left"],
+        "time":[1],
+        "interval":[0.01]
+    }
+}

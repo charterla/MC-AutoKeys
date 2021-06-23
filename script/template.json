@@ -1,0 +1,9 @@
+{
+    "trigger":"",
+    "script":{
+        "type":[],
+        "key":[],
+        "time":[],
+        "interval":[]
+    }
+}
