@@ -1,9 +1,10 @@
 {
-    "trigger":"Key.f7",
+    "trigger":"f7",
     "script":{
         "type":["mouse"],
         "key":["left"],
-        "time":[1],
-        "interval":[0.01]
+        "time":[1000],
+        "continue":[0.001],
+        "interval":[0.65]
     }
 }

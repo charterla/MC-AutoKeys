@@ -1,51 +1,71 @@
-from os import putenv
 import pydirectinput
 import pyautogui
-import pynput
-from pynput.keyboard import Key
-import time
+import keyboard
 import os
 import json
 import asyncio
 
-Queue = set()
-with open('./script/running.json', mode='r', encoding='utf-8') as scriptData:
-    script = json.load(scriptData)
 
+class runScript():
+    def __init__(self):
+        self.Queue = set()
+        self.setup()
 
-async def runScript(key):
-    while key in Queue:
-        print(Queue, end=' ')
-        await asyncio.sleep(100)
-        '''for i in range(len(script['script']['type'])):
-            if script['script']['type'][i] == 'keyboard':
-                for tim in range(int(script['script']['time'][i])):
-                    pydirectinput.keyDown(script['script']['key'][i])
-                    time.sleep(float(script['script']['interval'][i]))
-                    pydirectinput.keyUp(script['script']['key'][i])
-            elif script['script']['type'][i] == 'mouse':
-                for tim in range(int(script['script']['time'][i])):
-                    pydirectinput.mouseDown(button=script['script']['key'][i])
-                    time.sleep(float(script['script']['interval'][i]))
-                    pydirectinput.mouseUp(button=script['script']['key'][i])'''
+        keyboard.add_hotkey(self.script['trigger'], lambda: self.trigger())
 
+        self.loop = asyncio.get_event_loop()
+        self.task = asyncio.ensure_future(self.detect())
+        self.loop.run_forever()
+        pass
 
-def on_press(key):
-    if(key == eval(script['trigger'])):
-        if key not in Queue:
-            Queue.add(key)
+    def setup(self):
+        with open('./script/running.json', mode='r', encoding='utf-8') as scriptData:
+            self.script = json.load(scriptData)
 
-            asyncio.run(runScript(key))
-        elif key in Queue:
-            Queue.remove(key)
+    def trigger(self):
+        if self.script['trigger'] not in self.Queue:
+            self.Queue.add(self.script['trigger'])
+        elif self.script['trigger'] in self.Queue:
+            self.Queue.remove(self.script['trigger'])
 
-        print("trigger", Queue)
+        # print('pressed')
+        pass
 
+    async def detect(self):
+        run = None
 
-def on_release(key):
-    return True
+        while True:
+            await asyncio.sleep(0)
+
+            if self.script['trigger'] in self.Queue and run == None:
+                run = asyncio.ensure_future(self.runTask())
+            elif self.script['trigger'] not in self.Queue and run != None:
+                if not run.cancelled():
+                    run.cancel()
+                else:
+                    run = None
+
+    async def runTask(self):
+        while True:
+            while self.script['trigger'] in self.Queue:
+                for i in range(len(self.script['script']['type'])):
+                    if self.script['script']['type'][i] == 'keyboard':
+                        for time in range(int(self.script['script']['time'][i])):
+                            pydirectinput.keyDown(
+                                self.script['script']['key'][i])
+                            await asyncio.sleep(float(self.script['script']['continue'][i]))
+                            pydirectinput.keyUp(
+                                self.script['script']['key'][i])
+                    elif self.script['script']['type'][i] == 'mouse':
+                        for time in range(int(self.script['script']['time'][i])):
+                            pydirectinput.mouseDown(
+                                button=self.script['script']['key'][i])
+                            await asyncio.sleep(float(self.script['script']['continue'][i]))
+                            pydirectinput.mouseUp(
+                                button=self.script['script']['key'][i])
+
+                    await asyncio.sleep(float(self.script['script']['interval'][i]))
 
 
 if __name__ == '__main__':
-    with pynput.keyboard.Listener(on_press=on_press, on_release=on_release) as listener:
-        listener.join()
+    runScript()
