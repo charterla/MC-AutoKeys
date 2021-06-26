@@ -54,17 +54,20 @@ class runScript():
                             pydirectinput.keyDown(
                                 self.script['script']['key'][i])
                             await asyncio.sleep(float(self.script['script']['continue'][i]))
+
                             pydirectinput.keyUp(
                                 self.script['script']['key'][i])
+                            await asyncio.sleep(float(self.script['script']['interval'][i]))
+
                     elif self.script['script']['type'][i] == 'mouse':
                         for time in range(int(self.script['script']['time'][i])):
                             pydirectinput.mouseDown(
                                 button=self.script['script']['key'][i])
                             await asyncio.sleep(float(self.script['script']['continue'][i]))
+
                             pydirectinput.mouseUp(
                                 button=self.script['script']['key'][i])
-
-                    await asyncio.sleep(float(self.script['script']['interval'][i]))
+                            await asyncio.sleep(float(self.script['script']['interval'][i]))
 
 
 if __name__ == '__main__':
